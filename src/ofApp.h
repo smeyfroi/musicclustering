@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxAudioAnalysisClient.h"
 #include "ofxAudioData.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp {
 
@@ -26,9 +27,17 @@ public:
   void gotMessage(ofMessage msg) override;
   
 private:
-  std::shared_ptr<ofxAudioAnalysisClient::FileClient> audioAnalysisClientPtr { std::make_shared<ofxAudioAnalysisClient::FileClient>("Jam-20240517-155805463") };
+//  std::shared_ptr<ofxAudioAnalysisClient::FileClient> audioAnalysisClientPtr { std::make_shared<ofxAudioAnalysisClient::FileClient>("Jam-20240517-155805463") }; // bells
+  std::shared_ptr<ofxAudioAnalysisClient::FileClient> audioAnalysisClientPtr { std::make_shared<ofxAudioAnalysisClient::FileClient>("Jam-20240402-094851837") }; //nightsong
   std::shared_ptr<ofxAudioData::Processor> audioDataProcessorPtr { std::make_shared<ofxAudioData::Processor>(audioAnalysisClientPtr) };
 
   std::vector<std::array<float, 2>> clusterSourceData;
   std::tuple<std::vector<std::array<float, 2>>, std::vector<uint32_t>> clusterResults;
+  
+  bool guiVisible { false };
+  ofxPanel gui;
+  ofParameterGroup parameters;
+
+  ofFbo connectionsFbo;
+
 };
