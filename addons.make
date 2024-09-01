@@ -4,4 +4,5 @@ ofxHistoryPlot
 ofxAudioAnalysisClient
 ofxAudioData
 ofxGui
+ofxSelfOrganizingMap
 ofxTimeMeasurements

@@ -5,6 +5,8 @@
 // https://github.com/genbattle/dkm/blob/master/include/dkm.hpp
 
 //--------------------------------------------------------------
+const int SOM_WIDTH = 128;
+const int SOM_HEIGHT = 128;
 void ofApp::setup(){
   ofSetVerticalSync(false);
   ofEnableAlphaBlending();
@@ -17,13 +19,21 @@ void ofApp::setup(){
   ofClear(ofFloatColor{0.0, 0.0, 0.0, 0.0});
   connectionsFbo.end();
 
+  double minInstance[3] = { 0.0, 0.0, 0.0 };
+  double maxInstance[3] = { 1.0, 1.0, 1.0 };
+  som.setFeaturesRange(3, minInstance, maxInstance);
+  som.setMapSize(SOM_WIDTH, SOM_HEIGHT); // can go to 3 dimensions
+  som.setInitialLearningRate(0.1);
+  som.setNumIterations(3000);
+  som.setup();
+
   gui.setup(parameters);
 
   ofxTimeMeasurements::instance()->setEnabled(true);
 }
 
 //--------------------------------------------------------------
-const int CLUSTER_CENTRES = 14;
+const int CLUSTER_CENTRES = 14; //8
 const int CLUSTER_SAMPLES_MAX = 5000;
 void ofApp::update(){
   TS_START("update-audoanalysis");
@@ -31,9 +41,12 @@ void ofApp::update(){
   TS_STOP("update-audoanalysis");
 
   if (audioDataProcessorPtr->isDataValid()) {
-    TS_START("update-kmeans");
     float s = audioDataProcessorPtr->getNormalisedScalarValue(ofxAudioAnalysisClient::AnalysisScalar::pitch, 700.0, 1300.0);
     float t = audioDataProcessorPtr->getNormalisedScalarValue(ofxAudioAnalysisClient::AnalysisScalar::rootMeanSquare, 400.0, 4000.0, false);
+    float u = audioDataProcessorPtr->getNormalisedScalarValue(ofxAudioAnalysisClient::AnalysisScalar::spectralKurtosis, 0.0, 25.0);
+    float v = audioDataProcessorPtr->getNormalisedScalarValue(ofxAudioAnalysisClient::AnalysisScalar::spectralCentroid, 0.4, 6.0);
+
+    TS_START("update-kmeans");
     clusterSourceData.push_back({ s, t });
     if (clusterSourceData.size() > CLUSTER_CENTRES) {
       dkm::clustering_parameters<float> params(CLUSTER_CENTRES); // to specify a stable seed
@@ -41,7 +54,17 @@ void ofApp::update(){
       clusterResults = dkm::kmeans_lloyd(clusterSourceData, params);
     }
     TS_STOP("update-kmeans");
-    
+
+    TS_START("update-som");
+    double instance[3] = {
+//      static_cast<double>(s),
+      static_cast<double>(s),
+      static_cast<double>(t),
+      static_cast<double>(v)
+    };
+    som.updateMap(instance);
+    TS_STOP("update-som");
+
     TS_START("update-connections");
     auto& clusterCentres = std::get<0>(clusterResults);
     connectionsFbo.begin();
@@ -49,12 +72,15 @@ void ofApp::update(){
     ofSetColor(ofFloatColor(1.0, 1.0, 1.0, 0.01));
 //    ofDrawRectangle(0, 0, connectionsFbo.getWidth(), connectionsFbo.getHeight());
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    ofSetColor(ofFloatColor(0.05, 0.05, 0.05, 0.1));
     for (auto& centre1 : clusterCentres) {
       for (auto& centre2 : clusterCentres) {
         float x1 = centre1[0]; float y1 = centre1[1];
         float x2 = centre2[0]; float y2 = centre2[1];
         if (x1 == x2 && y1 == y2) continue;
+        double* somValue = som.getMapAt(x1*SOM_WIDTH, y1*SOM_HEIGHT);
+        const float COL_FACTOR = 0.05;
+        ofFloatColor color(somValue[0]*COL_FACTOR, somValue[1]*COL_FACTOR, somValue[2]*COL_FACTOR, 0.05);
+        ofSetColor(color);
         ofDrawLine(x1*Constants::CANVAS_WIDTH, y1*Constants::CANVAS_HEIGHT, x2*Constants::CANVAS_WIDTH, y2*Constants::CANVAS_HEIGHT);
       }
     }

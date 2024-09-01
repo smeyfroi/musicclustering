@@ -4,6 +4,7 @@
 #include "ofxAudioAnalysisClient.h"
 #include "ofxAudioData.h"
 #include "ofxGui.h"
+#include "ofxSelfOrganizingMap.h"
 
 class ofApp : public ofBaseApp {
 
@@ -39,5 +40,7 @@ private:
   ofParameterGroup parameters;
 
   ofFbo connectionsFbo;
+
+  ofxSelfOrganizingMap som;
 
 };
