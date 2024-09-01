@@ -8,7 +8,10 @@ struct Constants {
   
   static const size_t CANVAS_WIDTH = WINDOW_WIDTH * 3.5;
   static const size_t CANVAS_HEIGHT = WINDOW_HEIGHT * 3.5;
-  
-  static const size_t DRAWING_WIDTH = CANVAS_WIDTH;
-  static const size_t DRAWING_HEIGHT = CANVAS_HEIGHT;
+
+  static const size_t FLUID_WIDTH = WINDOW_WIDTH * 1.0;
+  static const size_t FLUID_HEIGHT = WINDOW_HEIGHT * 1.0;
+
+//  static const size_t DRAWING_WIDTH = CANVAS_WIDTH;
+//  static const size_t DRAWING_HEIGHT = CANVAS_HEIGHT;
 };
