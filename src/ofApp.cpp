@@ -83,7 +83,7 @@ void ofApp::update(){
         if (x1 == x2 && y1 == y2) continue;
         double* somValue = som.getMapAt(x1*SOM_WIDTH, y1*SOM_HEIGHT);
         const float COL_FACTOR = 0.3;
-        ofFloatColor color(somValue[0]*COL_FACTOR, somValue[1]*COL_FACTOR, somValue[2]*COL_FACTOR, 0.1);
+        ofFloatColor color(somValue[0]*COL_FACTOR, somValue[1]*COL_FACTOR, somValue[2]*COL_FACTOR, 0.05);
         ofSetColor(color);
         ofDrawLine(x1*Constants::FLUID_WIDTH, y1*Constants::FLUID_HEIGHT, x2*Constants::FLUID_WIDTH, y2*Constants::FLUID_HEIGHT);
       }
@@ -107,9 +107,9 @@ void ofApp::update(){
       ofFloatColor color = ofFloatColor(somValue[0], somValue[1], somValue[2], 0.005) * COL_FACTOR;
       FluidSimulation::Impulse impulse {
         { x * Constants::FLUID_WIDTH, y * Constants::FLUID_HEIGHT },
-        Constants::FLUID_WIDTH * 0.05, // radius
+        Constants::FLUID_WIDTH * 0.08, // radius
         { 0.0, 0.0 }, // velocity
-        0.0005, // radialVelocity
+        0.00005, // radialVelocity
         color,
         10.0 // temperature
       };
